@@ -1,24 +1,29 @@
 # test script for reading and plotting from database
 
 import sqlite3
-from matplotlib.pyplot import *
+import matplotlib.pyplot as p
+import matplotlib.dates as d
 
-conn = sqlite3.connect('/home/pi/test1.db')
+conn = sqlite3.connect('/home/pi/TestDB.db')
 
 print("Opened database")
 
-humidity = []
+temp = []
 date = []
+# id = []
 
-records = conn.execute("SELECT humidity, date from tafla1 where humidity >=0 and date >= 0")
+records = conn.execute('SELECT temp, dt as "[timestamp]", ID from tafla1 where temp not null order by dt')
 
 for row in records:
-	humidity.append(row[0]) 
-	date.append(row[1]) 
-
-print("Number of humidity records: ", len(humidity))
+	temp.append(row[0]) 
+	date.append(row[1])
+	#id.append(row[2])
+# https://stackoverflow.com/questions/18535662/matplotlib-how-to-convert-dates-from-sqlite-to-matplotlib-format
+#print(type(d.datetime.strptime(date[0], '%Y-%m-%d %H:%M:%S')))
+print("Number of temp records: ", len(temp))
 print("Number of date records: ", len(date))
 print("Operation done successfully")
 conn.close()
 
-plot(date, humidity)
+p.plot(temp)
+p.show()

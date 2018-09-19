@@ -15,7 +15,7 @@ using namespace std;
 // RPI Pin configuration
 RF24 radio(22,0);
 
-// Assign a unique identifier for this node, 0 or 1
+// Assign a unique identifier for this node, 0 or 1 
 bool radioNumber = 1;
 
 // Radio pipe addresses for the 2 nodes to communicate.

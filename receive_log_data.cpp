@@ -25,6 +25,10 @@ bool global_bool = 1;
 // Radio pipe addresses for the 2 nodes to communicate.
 const uint8_t pipes[][6] = {"1Node","2Node"};
 
+// Define a global int that keep tracks of number of logs to the DB and 
+// is the primary key in the database
+//int db_counter = 0;
+
 // Define the callback function for the sqlite_exec function
 static int callback(void *NotUsed, int argc, char **argv, char **azColName) {
    int i;
@@ -35,27 +39,51 @@ static int callback(void *NotUsed, int argc, char **argv, char **azColName) {
    return 0;
 }
 
+// Defining an callback function for reading values from the DB
+static int callback2(void *data, int argc, char **argv, char **azColName){
+   // Taken from Tutorials point guide
+   printf("argv %s = %s\n", azColName[argc-1], argv[argc-1] ? argv[argc-1] : "NULL");
+   //db_counter = (int)*argv[argc-1] - '0';
+   //printf ("db_counter: %d \n", db_counter);
+   return 0;
+}
+
 int log_to_db(float *next_data, string *column) {
    // Properties for the SQLite database connection
    sqlite3 *db;
    char *zErrMsg = 0;
    int rc;
+   //int curr_key[2];
    std::string sql;
 
    /* Open database */
-   rc = sqlite3_open("/home/pi/test1.db", &db);
-   
+   rc = sqlite3_open("/home/pi/TestDB.db", &db);
    if( rc ) {
       fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
       return(0);
    } else {
       fprintf(stderr, "Opened database successfully\n");
    }
-
-   // Create the SQL statement
-   sql = "INSERT INTO tafla1("+ *column + ", date) VALUES (" + std::to_string(*next_data) + ", datetime('now'))";
+	
+   
+   // Extract current unique key
+   sql = "select max(id) from tafla1";
    // cast the std::string to const char* for the SQL function
    const char * c = sql.c_str();
+   rc = sqlite3_exec(db, c, callback2, 0, &zErrMsg);
+   if( rc != SQLITE_OK ) {
+      fprintf(stderr, "SQL error: %s\n", zErrMsg);
+      sqlite3_free(zErrMsg);
+      sqlite3_close(db);
+      return 0;
+   } else {
+      fprintf(stdout, "Unique key read successfully\n");
+   }
+   // Increment the unique key
+   //db_counter++;
+   // Create the SQL statement for insertion
+   sql = "INSERT INTO tafla1("+ *column + ") VALUES ("+ std::to_string(*next_data)+ ")"; //   + std::to_string(db_counter) + ","  + ", datetime('now'))"
+   c = sql.c_str();
    // Execute the SQL statement 
    rc = sqlite3_exec(db, c, callback, 0, &zErrMsg);
    
