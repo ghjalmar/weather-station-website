@@ -24,8 +24,7 @@ RF24 radio(22,0);
 
 // Assign a unique identifier for this node, 0 or 1
 bool radioNumber = 1;
-// Global bool is used for a nested while loop
-bool global_bool = 1;
+
 // Radio pipe addresses for the 2 nodes to communicate.
 const uint8_t pipes[][6] = {"1Node","2Node"};
 
@@ -60,7 +59,7 @@ int log_to_db(float *next_data, string *column) {
    std::string sql;
 
    /* Open database */
-   rc = sqlite3_open("/home/pi/TestDB.db", &db);
+   rc = sqlite3_open("/home/pi/DataBase1.db", &db);
    if( rc ) {
       fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
       return(0);
@@ -70,7 +69,7 @@ int log_to_db(float *next_data, string *column) {
 	
    
    // Create the SQL statement for insertion
-   sql = "INSERT INTO tafla1("+ *column + ") VALUES ("+ std::to_string(*next_data)+ ")"; //   + std::to_string(db_counter) + ","  + ", datetime('now'))"
+   sql = "INSERT INTO table1("+ *column + ") VALUES ("+ std::to_string(*next_data)+ ")"; //   + std::to_string(db_counter) + ","  + ", datetime('now'))"
    const char * c = sql.c_str();
    // Execute the SQL statement 
    rc = sqlite3_exec(db, c, callback, 0, &zErrMsg);
@@ -80,6 +79,7 @@ int log_to_db(float *next_data, string *column) {
       sqlite3_free(zErrMsg);
    } else {
       fprintf(stdout, "Records created successfully\n");
+      sqlite3_close(db);
       return 1;
    }
    sqlite3_close(db);
@@ -90,48 +90,12 @@ int check_data(float *read_data){
 	// Function that reads the received data and determines what field it is
 	// Returns 1 if the readings are successfull, 0 if not 
 	std::string column;
-	if(*read_data == -10000) {
-		// temp
-		column = "temp";
-	} else if(*read_data == -10001){
-		// pressure
-		column = "pressure";
-	} else if(*read_data == -10002){
-		// height
-		column = "height";
-	} else if(*read_data == -10003){
-		// humidity
-		column = "humidity";
+	if((*read_data == -10000) || (*read_data == -10001) || (*read_data == -10002) || (*read_data == -10003)){
+		// the received package was an indicator message
+		return 1;
 	} else{
 		// not able to determine what field the received data is
 		return 0;
-	}
-	// listen for next package
-	bool nested_bool = true;
-	float next_data;
-	radio.startListening();
-	while (nested_bool ){
-		if ( radio.available() )	{
-			while(radio.available()){
-				radio.read( &next_data, sizeof(float) );
-			}
-			nested_bool = false;
-			radio.stopListening(); // data package received	
-			radio.write( &next_data, sizeof(float));
-			printf("Got next_data payload(%d) %f...\n",sizeof(float), next_data);
-		}
-	}
-	// next_data should be positive, return 0 if not
-	if (next_data < 0){
-		return 0;
-	} else{
-		// Call log_to_db
-		printf("calling log_to_db with next_data (%d) %f...\n",sizeof(float), next_data);
-		int status = log_to_db(&next_data, &column);
-		if (status == 1){
-			return 1;
-		} else{
-			return 0;}
 	}
 }
 
@@ -151,14 +115,17 @@ int main(int argc, char** argv){
 	radio.openReadingPipe(1,pipes[0]);
 	
 	radio.startListening();
-
+	// Variables used in the while loop
+	int counter_temp;
+	float indicator;
+	std::string column;
 	// forever loop the listening
 	while (1)
 	{
 		//  Receive each packet, dump it out, and send it back
-			
 		// see if there is data ready
-		if ( radio.available() && global_bool)
+		
+		if ( radio.available())
 		{
 			// Dump the payloads until we've gotten everything
 			float read_data;
@@ -173,17 +140,44 @@ int main(int argc, char** argv){
 			printf("Got payload(%d) %f...\n",sizeof(float), read_data);
 			
 			// log to db if possible
-			global_bool = false;
 			int status = check_data(&read_data);
+			printf("check_data resulted in status = %d \n", status);
 			if (status == 1){
-				printf("Check data function logged data \n");
-			} else{
-				printf("Check data function failed \n");
-				//radio.startListening();
+				// The received package was an indicator
+				indicator = read_data;
+				counter_temp = 0;				
+			} else if((status == 0) && (counter_temp == 1)){
+				// Previous package was an indicator and the current package
+				// should be a value to log
+				// From temp_val, determine what field was in the previous package
+				if(indicator == -10000) {
+					// temperature
+					column = "temp";
+				} else if(indicator == -10001){
+					// pressure
+					column = "pressure";
+				} else if(indicator == -10002){
+					// height
+					column = "height";
+				} else if(indicator == -10003){
+					// humidity
+					column = "humidity";
+				} else{
+					// not able to determine what field the received data is
+					// something wrong
+					printf("Should be able to determine field but wasn't \n");
 				}
-			
+				// Call log_to_db
+				printf("calling log_to_db with data (%d) %f...\n",sizeof(float), read_data);
+				log_to_db(&read_data, &column);
+			} else{
+				printf("Did not receive an indicator and/or counter_temp not 0 \n");
+				printf("Read data: %f status : %d  counter temp : %d \n", read_data, status, counter_temp);
+				}
+			// Signal for next package
+			counter_temp = counter_temp + 1;
 			// Now, resume listening so we catch the next packets.
-			global_bool = true;
+			
 			radio.startListening();
 			
 			delay(925); //Delay after payload responded to, minimize RPi CPU time

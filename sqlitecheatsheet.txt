@@ -1,0 +1,6 @@
+sjá hausa töflu:
+PRAGMA table_info(table_name);
+setja default tímann í rétt time zone:
+timestamp DATE DEFAULT (datetime('now','localtime'))
+búa til töflu:
+CREATE TABLE tablename

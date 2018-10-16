@@ -1,0 +1,3 @@
+# Files to exclude are the log txt files and the png plots
+*.png
+*.txt

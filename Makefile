@@ -18,6 +18,7 @@
 include Makefile.inc
 
 # define all programs
-PROGRAMS = receive_sensordata receive_log_data
+# receive_sensordata receive_log_data
+PROGRAMS = receive_log_data_reduced
 
 include Makefile.examples
