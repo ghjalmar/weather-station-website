@@ -22,9 +22,9 @@ p_date = []
 # id = []
 
 #records = conn.execute('SELECT temp, dt as "[timestamp]", ID from tafla1 where temp not null order by dt') 
-temp_records = conn.execute('Select temp, dt as "[timestamp]", ID from table2 where ((dt between datetime("now", "-2 days") and datetime("now", "localtime")) and (temp not null))');
-humidity_records = conn.execute('Select humidity, dt as "[timestamp]", ID from table2 where ((dt between datetime("now", "-2 days") and datetime("now", "localtime")) and (humidity not null))');
-pressure_records = conn.execute('Select pressure, dt as "[timestamp]", ID from table2 where ((dt between datetime("now", "-2 days") and datetime("now", "localtime")) and (pressure not null))');
+temp_records = conn.execute('Select temp, dt as "[timestamp]" from table3 where ((dt between datetime("now", "-2 days") and datetime("now", "localtime")) and (temp not null))');
+humidity_records = conn.execute('Select humidity, dt as "[timestamp]" from table3 where ((dt between datetime("now", "-2 days") and datetime("now", "localtime")) and (humidity not null))');
+pressure_records = conn.execute('Select pressure, dt as "[timestamp]" from table3 where ((dt between datetime("now", "-2 days") and datetime("now", "localtime")) and (pressure not null))');
 # Store the values to lists
 for row in temp_records:
 	temp.append(row[0])

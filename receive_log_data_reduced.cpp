@@ -69,7 +69,7 @@ int log_to_db(float *next_data, string *column) {
 	
    
    // Create the SQL statement for insertion
-   sql = "INSERT INTO table2("+ *column + ") VALUES ("+ std::to_string(*next_data)+ ")"; //   + std::to_string(db_counter) + ","  + ", datetime('now'))"
+   sql = "INSERT INTO table3("+ *column + ") VALUES ("+ std::to_string(*next_data)+ ")"; //   + std::to_string(db_counter) + ","  + ", datetime('now'))"
    const char * c = sql.c_str();
    // Execute the SQL statement 
    rc = sqlite3_exec(db, c, callback, 0, &zErrMsg);
@@ -97,6 +97,29 @@ int check_data(float *read_data){
 		// not able to determine what field the received data is
 		return 0;
 	}
+}
+
+int check_column(float *indicator, std::string *column){
+	// From temp_val, determine what field was in the previous package
+	if(*indicator == -10000) {
+		// temperature
+		*column = "temp";
+	} else if(*indicator == -10001){
+		// pressure
+		*column = "pressure";
+	} else if(*indicator == -10002){
+		// height
+		*column = "height";
+	} else if(*indicator == -10003){
+		// humidity
+		*column = "humidity";
+	} else{
+		// not able to determine what field the received data is
+		// something wrong
+		printf("Should be able to determine field but wasn't \n");
+		return 0;
+	}
+	return 1;
 }
 
 int main(int argc, char** argv){
@@ -149,27 +172,11 @@ int main(int argc, char** argv){
 			} else if((status == 0) && (counter_temp == 1)){
 				// Previous package was an indicator and the current package
 				// should be a value to log
-				// From temp_val, determine what field was in the previous package
-				if(indicator == -10000) {
-					// temperature
-					column = "temp";
-				} else if(indicator == -10001){
-					// pressure
-					column = "pressure";
-				} else if(indicator == -10002){
-					// height
-					column = "height";
-				} else if(indicator == -10003){
-					// humidity
-					column = "humidity";
-				} else{
-					// not able to determine what field the received data is
-					// something wrong
-					printf("Should be able to determine field but wasn't \n");
+				if(check_column(&indicator, &column) == 1){
+					// Call log_to_db
+					printf("calling log_to_db with data (%d) %f...\n",sizeof(float), read_data);
+					log_to_db(&read_data, &column);
 				}
-				// Call log_to_db
-				printf("calling log_to_db with data (%d) %f...\n",sizeof(float), read_data);
-				log_to_db(&read_data, &column);
 			} else{
 				printf("Did not receive an indicator and/or counter_temp not 0 \n");
 				printf("Read data: %f status : %d  counter temp : %d \n", read_data, status, counter_temp);
