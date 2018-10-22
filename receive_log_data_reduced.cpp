@@ -69,7 +69,7 @@ int log_to_db(float *next_data, string *column) {
 	
    
    // Create the SQL statement for insertion
-   sql = "INSERT INTO table1("+ *column + ") VALUES ("+ std::to_string(*next_data)+ ")"; //   + std::to_string(db_counter) + ","  + ", datetime('now'))"
+   sql = "INSERT INTO table2("+ *column + ") VALUES ("+ std::to_string(*next_data)+ ")"; //   + std::to_string(db_counter) + ","  + ", datetime('now'))"
    const char * c = sql.c_str();
    // Execute the SQL statement 
    rc = sqlite3_exec(db, c, callback, 0, &zErrMsg);
@@ -116,8 +116,8 @@ int main(int argc, char** argv){
 	
 	radio.startListening();
 	// Variables used in the while loop
-	int counter_temp;
-	float indicator;
+	int counter_temp = 100;
+	float indicator = 0;
 	std::string column;
 	// forever loop the listening
 	while (1)
