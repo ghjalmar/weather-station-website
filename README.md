@@ -7,7 +7,7 @@ Code for my project on measuring the 'weather' inside my home, plotting the data
 The project consists of three different main parts:
 * A micro-controller (an arduino clone) which measures temperature, pressure and humidity using an external sensor. The micro-controller then transmits those sensor readings wirelessly to a RaspberryPi.
 * RaspberryPi which receives the sensor readings and stores them in a SQL database. The Raspberry periodically plots the latest sensor readings and saves the plots.
-* Website that displays the latest plots of the sensor readings (this website that you are reading now!). The website is hosted on the RaspberryPi as well and the traffic goes through my router at home.
+* Website that displays the latest plots of the sensor readings. The website was hosted on the RaspberryPi as well and the traffic was routed through my router at home.
 
 About the code:
 *The code for the micro-controller is written using the Arduino editor and compiler. (Arduino_code.ino)
