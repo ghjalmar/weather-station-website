@@ -10,11 +10,11 @@ The project consists of three different main parts:
 * Website that displays the latest plots of the sensor readings. The website was hosted on the RaspberryPi as well and the traffic was routed through my router at home.
 
 About the code:
-*The code for the micro-controller is written using the Arduino editor and compiler. (Arduino_code.ino)
-*The program on the Raspberry which receives the sensor readings is written in C++ and uses TMRh20’s library. (receive_log_data_reduced.cpp)
-*I used SQLite3 for managing the database of the sensor readings, due to it’s simplicity.
-*The plots are done in Python using Matplotlib.
-*The website used to be hosted on my RaspberryPi and the traffic was routed through my router at home. The website is currently down. 
+* The code for the micro-controller is written using the Arduino editor and compiler. (Arduino_code.ino)
+* The program on the Raspberry which receives the sensor readings is written in C++ and uses TMRh20’s library. (receive_log_data_reduced.cpp)
+* I used SQLite3 for managing the database of the sensor readings, due to it’s simplicity.
+* The plots are done in Python using Matplotlib.
+* The website used to be hosted on my RaspberryPi and the traffic was routed through my router at home. The website is currently down. 
 
 Pictures of the set up: 
 ![The RaspberryPi and the attached nRF module.](/pictures/rpi.png)
