@@ -18,4 +18,4 @@ About the code:
 
 Pictures of the set up: 
 ![The RaspberryPi and the attached nRF module.](/pictures/rpi.png)
-![The micro-controller, attached are nRF module and the sensor.](/pictures/snsr.png)
+![The micro-controller, attached are nRF module and the sensor.](/pictures/snsr.jpg)
